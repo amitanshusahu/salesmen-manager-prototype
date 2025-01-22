@@ -18,19 +18,14 @@ export default function Index() {
 
   useEffect(() => {
     if (loginQuery.isSuccess) {
-      router.push("/(tabs)");
       setIsLogedIn(true);
-      console.log(loginQuery.data);
-    }
-    if (loginQuery.isError) {
-      router.push("/(auth)/welcome");
     }
   }, [setIsLogedIn, loginQuery.data]);
 
   useEffect(() => {
     if (isLogedIn) {
       console.log("isLogedIn", isLogedIn);
-      router.push("/(tabs)");
+      // router.push("/(tabs)");
     }
   }, []);
 
@@ -44,6 +39,9 @@ export default function Index() {
       }}
     >
       <Text style={{ fontSize: 40 }}>Splash screen</Text>
+      <TouchableOpacity onPress={() => router.push("/(auth)/welcome")}>
+        <Text>Go to welcome</Text>
+      </TouchableOpacity>
     </View>
   );
 }
