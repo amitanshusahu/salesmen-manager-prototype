@@ -5,9 +5,10 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput,
 import { CaretRight, GpsFix, PlusCircle, UserCircle } from "phosphor-react-native";
 import { primary } from "@/constants/Colors";
 import { useRouter } from "expo-router";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRefreshOnFocus } from "@/hook/useRefetchOnFocus";
 import EmptyBox from "@/components/ui/EmptyBox";
+import { useMannagedCounts } from "@/store";
 
 interface Location {
   id: number;
@@ -34,6 +35,12 @@ export default function LocationList() {
   });
   const refetch = locationQuery.refetch;
   useRefreshOnFocus(refetch);
+  const {setTotalStores} = useMannagedCounts();
+  useEffect(() => {
+    if(locationQuery.isSuccess) {
+      setTotalStores(locationQuery.data.data.length);
+    }
+  }, [locationQuery.data]);
 
   return (
     <ScrollView>

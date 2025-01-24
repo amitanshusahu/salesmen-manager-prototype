@@ -7,6 +7,8 @@ import { useRouter } from "expo-router";
 import { primary } from "@/constants/Colors";
 import { useRefreshOnFocus } from "@/hook/useRefetchOnFocus";
 import EmptyBox from "@/components/ui/EmptyBox";
+import { useEffect } from "react";
+import { useMannagedCounts } from "@/store";
 
 interface SalesMen {
   id: number;
@@ -33,6 +35,12 @@ export default function salesmen() {
   });
   const refetch = salesmanQuery.refetch;
   useRefreshOnFocus(refetch);
+  const {setTotalSalesmen} = useMannagedCounts();
+  useEffect(() => {
+    if(salesmanQuery.isSuccess) {
+      setTotalSalesmen(salesmanQuery.data.data.length);
+    }
+  }, [salesmanQuery.data]);
 
   return (
     <ScrollView>

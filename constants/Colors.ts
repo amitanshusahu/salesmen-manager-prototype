@@ -26,3 +26,4 @@ export const Colors = {
 };
 
 export const primary = "#2b7cff";
+export const secondary = "#e3eeff";
