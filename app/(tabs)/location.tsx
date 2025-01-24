@@ -1,15 +1,13 @@
 import { API_ROUTES } from "@/constants/ApiRoutes";
 import { api } from "@/lib/axios/axios";
 import { useQuery } from "@tanstack/react-query";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import QRCode from 'react-native-qrcode-svg';
-import { PlusCircle } from "phosphor-react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, StyleSheet } from "react-native";
+import { CaretRight, GpsFix, PlusCircle, UserCircle } from "phosphor-react-native";
 import { primary } from "@/constants/Colors";
 import { useRouter } from "expo-router";
-import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library';
 import React, { useRef } from "react";
 import { useRefreshOnFocus } from "@/hook/useRefetchOnFocus";
+import EmptyBox from "@/components/ui/EmptyBox";
 
 interface Location {
   id: number;
@@ -23,55 +21,19 @@ interface LocationData {
   data: Location[];
 }
 
-const QRCodeWithRef = React.forwardRef((props: any, ref: any) => (
-  <QRCode
-    {...props}
-    getRef={ref}
-  />
-));
-
 async function getLocationById(): Promise<LocationData> {
   const res = await api.get(API_ROUTES.LOCATION.GET_BY_MANAGER_ID);
   return res.data;
 }
 
 export default function LocationList() {
-  useRefreshOnFocus(() => locationQuery.refetch());
   const router = useRouter();
   const locationQuery = useQuery<LocationData>({
     queryKey: ["store"],
     queryFn: getLocationById
   });
-
-  const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
-  const qrRefs = useRef<any[]>([]);
-
-  const handlePressDownload = async (index: number, locationId: number) => {
-    try {
-      let isPermissionGranted = permissionResponse?.granted;
-      if (!isPermissionGranted) {
-        isPermissionGranted = (await requestPermission()).granted;
-      }
-
-      if (!isPermissionGranted) {
-        throw new Error('Library permission access denied');
-      }
-
-      qrRefs.current[index]?.toDataURL(async (base64Code: string) => {
-        const filename = FileSystem.documentDirectory + `qr_code_${locationId}.png`;
-        
-        await FileSystem.writeAsStringAsync(filename, base64Code, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        await MediaLibrary.saveToLibraryAsync(filename);
-        alert('QR code downloaded!');
-      });
-    } catch (error) {
-      console.error('QR downloading failed: ', error);
-      alert('Failed to download QR code');
-    }
-  };
+  const refetch = locationQuery.refetch;
+  useRefreshOnFocus(refetch);
 
   return (
     <ScrollView>
@@ -79,47 +41,82 @@ export default function LocationList() {
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Store</Text>
           <TouchableOpacity onPress={() => router.push("/(modals)/add_store")}>
-            <PlusCircle size={32} color={primary} />
+            <PlusCircle size={42} color={`${primary}`} />
           </TouchableOpacity>
         </View>
 
-        <View style={{ display: 'flex', width: '100%', gap: 50 }}>
-          {locationQuery.isLoading && <Text>Loading...</Text>}
+        <View style={{ display: 'flex', width: '100%', gap: 10 }}>
+          <TextInput placeholder="search" style={style.input} keyboardType="web-search" />
+
           {locationQuery.isError && <Text>Error...</Text>}
-          {locationQuery.data?.data.map((item, index) => (
-            <View 
-              style={{ 
-                padding: 30, 
-                width: "100%", 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                gap: 20, 
-                backgroundColor: "#f2f2f2", 
-                borderRadius: 20 
-              }}
-              key={item.id}
-            >
-              <View style={{ justifyContent: 'center', alignItems: "center" }}>
-                <Text style={{ fontSize: 18, fontWeight: "900" }}>{item.name}</Text>
-                <Text style={{ fontSize: 12 }}>{item.address}</Text>
-              </View>
-              <QRCodeWithRef
-                value={`${item.id}`}
-                size={250}
-                logo={require('@/assets/images/nexus-logo.webp')}
-                backgroundColor="#f2f2f2"
-                ref={el => qrRefs.current[index] = el}
-              />
-              <View style={{ backgroundColor: "white", padding: 10, width: "100%", borderRadius: 10 }}>
-                <TouchableOpacity onPress={() => alert("This feature is not available for your device, please take screenshot")}>
-                  <Text style={{ textAlign: 'center', color: 'blue' }}>Download</Text>
+          {locationQuery?.data?.data.length === 0 && <EmptyBox text="No Stores Found" />}
+          {locationQuery.data?.data.map((item, index) => {
+            const truncate = (text: string, maxLength: number) =>
+              text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+
+            const trimmedName = truncate(item.name, 20);
+            const trimmedAddress = truncate(item.address, 30);
+
+            return (
+              <View
+                key={item.id}
+                style={{
+                  paddingVertical: 10,
+                  backgroundColor: 'white',
+                  borderRadius: 10,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  position: "relative"
+                }}
+              >
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: "row",
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: 10
+                  }}
+                >
+                  <GpsFix size={32} weight="duotone" color={primary} duotoneColor={primary} />
+                  <View>
+                    {/* Truncated Name */}
+                    <Text style={{ fontWeight: "500", fontSize: 18 }}>{trimmedName}</Text>
+                    {/* Full Multiline Address */}
+                    <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedAddress}</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    padding: 10,
+                    backgroundColor: "#e3eeff",
+                    borderRadius: 10
+                  }}
+                  onPress={() => router.push(`/(modals)/qr/${item.id}?name=${encodeURIComponent(item.name)}&address=${encodeURIComponent(item.address)}`)}
+                >
+                  <CaretRight size={32} color={primary} />
                 </TouchableOpacity>
               </View>
-            </View>
-          ))}
+            );
+          })}
+          {locationQuery.isFetching && <ActivityIndicator size="large" color={primary} />}
         </View>
       </View>
     </ScrollView>
   );
 }
+
+const style = StyleSheet.create({
+  input: {
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 10,
+    width: "100%",
+    marginBottom: 10,
+    marginTop: 30
+  }
+})

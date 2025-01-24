@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, View, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity } from 'react-native';
+import { StyleSheet, TextInput, View, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { addSalesMan } from '@/lib/http/mutations';
@@ -42,7 +42,7 @@ export default function AddSalesmen() {
   return (
     <View style={{ padding: 30, backgroundColor: 'white' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()} style={{ padding: 10, backgroundColor: "#f2f2f2", borderRadius: 10 }}>
           <CaretLeft size={32} weight="bold" />
         </TouchableOpacity>
       </View>
@@ -62,12 +62,14 @@ export default function AddSalesmen() {
           style={style.input}
           keyboardType="numeric"
         />
-        <Button
-          title="Add Salesman"
-          btnStyle={{ width: '100%', backgroundColor: primary }}
-          textStyle={{ color: 'white' }}
-          onPress={handleAddSalesmen}
-        />
+        {
+          mutation.isPending ? <ActivityIndicator size="large" color={primary} /> : <Button
+            title="Add Salesman"
+            btnStyle={{ width: '100%', backgroundColor: primary }}
+            textStyle={{ color: 'white' }}
+            onPress={handleAddSalesmen}
+          />
+        }
       </View>
     </View>
   );

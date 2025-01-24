@@ -15,6 +15,9 @@ export const API_ROUTES = {
     GET_ALL: `${BASE_URL}/api/admin/get/salesmen/all`,
     GET_BY_MANAGER_ID: `${BASE_URL}/api/admin/get/salesmen/my`,
     CREATE: `${BASE_URL}/api/admin/create/salesmen`,
+    ASSIGN_STORE: `${BASE_URL}/api/admin/assign`,
+    GET_ASSIGNED_STORES_BY_SALESMAN_ID: `${BASE_URL}/api/admin/get/assign/bysalesmanid?id=`,
+    GET_VISITED_LOCATIONS_BY_SALESMAN_ID: `${BASE_URL}/api/admin/get/salesmen/visitedlocation?id=`,
   },
   LOCATION: {
     GET_ALL: `${BASE_URL}/api/admin/get/locations/all`,

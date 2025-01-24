@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button";
 import { addLocation } from "@/lib/http/mutations";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { View, TextInput, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity } from "react-native";
+import { View, TextInput, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import * as Location from 'expo-location';
 import { CaretLeft, MapPinPlus } from "phosphor-react-native";
 import { useRouter } from "expo-router";
@@ -11,18 +11,18 @@ import { primary } from "@/constants/Colors";
 export default function AddStore() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
+  const [region, setRegion] = useState("");
+  const [state, setState] = useState("");
   const router = useRouter();
 
   const getLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-  
+
     if (status !== 'granted') {
       alert('Permission Denied');
       return null;
     }
-  
+
     try {
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
@@ -34,7 +34,7 @@ export default function AddStore() {
       return null;
     }
   };
-  
+
 
   const handleInputNameChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
     setName(e.nativeEvent.text);
@@ -44,6 +44,14 @@ export default function AddStore() {
     setAddress(e.nativeEvent.text);
   };
 
+  const handleRegionChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+    setRegion(e.nativeEvent.text);
+  }
+
+  const handleStateChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+    setState(e.nativeEvent.text);
+  }
+
   const mutation = useMutation({
     mutationFn: addLocation,
     onSuccess: (data) => {
@@ -51,8 +59,8 @@ export default function AddStore() {
       alert('Store Added Successfully');
       setName('');
       setAddress('');
-      setLatitude(null);
-      setLongitude(null);
+      setRegion('');
+      setState('');
     },
     onError: (error) => {
       console.error(error);
@@ -62,27 +70,27 @@ export default function AddStore() {
 
   const handleAddStore = async () => {
     const location = await getLocation();
-  
+
     if (location) {
       const { latitude, longitude } = location;
-      mutation.mutate({ name, address, latitude, longitude });
+      mutation.mutate({ name, address, latitude, longitude, region, state });
     } else {
       alert('Please retrieve the location first.');
     }
   };
 
   return (
-    <View style={{ padding: 30, backgroundColor: "white" }}>
+    <ScrollView style={{ padding: 30, backgroundColor: "white", minHeight: '100%' }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()} style={{ padding: 10, backgroundColor: "#f2f2f2", borderRadius: 10 }}>
           <CaretLeft size={32} weight="bold" />
         </TouchableOpacity>
       </View>
 
       <View style={{ display: 'flex', alignItems: 'center', minHeight: '100%', gap: 20, marginTop: 100 }}>
-        <MapPinPlus size={100} color={primary} />
+        <MapPinPlus size={100} color={primary} weight="duotone" duotoneColor={primary} />
         <TextInput
-          placeholder="Name"
+          placeholder="Market Name"
           value={name}
           onChange={handleInputNameChange}
           style={style.input}
@@ -93,14 +101,28 @@ export default function AddStore() {
           onChange={handleAddressChange}
           style={style.input}
         />
-        <Button
-          title="Add Store"
-          btnStyle={{ width: '100%', backgroundColor: primary }}
-          textStyle={{ color: 'white' }}
-          onPress={handleAddStore}
+        <TextInput
+          placeholder="Region"
+          value={region}
+          onChange={handleRegionChange}
+          style={style.input}
         />
+        <TextInput
+          placeholder="State"
+          value={state}
+          onChange={handleStateChange}
+          style={style.input}
+        />
+        {
+          mutation.isPending ? <ActivityIndicator size="large" color={primary} /> : <Button
+            title="Add Store"
+            btnStyle={{ width: '100%', backgroundColor: primary }}
+            textStyle={{ color: 'white' }}
+            onPress={handleAddStore}
+          />
+        }
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

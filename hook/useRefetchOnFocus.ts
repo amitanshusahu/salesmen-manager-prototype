@@ -10,6 +10,7 @@ export function useRefreshOnFocus<T>(refetch: () => Promise<T>) {
         firstTimeRef.current = false
         return
       }
+      console.log('refetching')
 
       refetch()
     }, [refetch]),

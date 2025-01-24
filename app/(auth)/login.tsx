@@ -2,7 +2,7 @@ import { postLogin } from "@/lib/http/mutations";
 import { useMutation } from "@tanstack/react-query";
 import Button from "@/components/ui/Button";
 import { useState } from "react";
-import { NativeSyntheticEvent, StyleSheet, Text, TextInput, TextInputChangeEventData, View } from "react-native";
+import { ActivityIndicator, NativeSyntheticEvent, StyleSheet, Text, TextInput, TextInputChangeEventData, View } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppConfig } from "@/constants/AppConfig";
 import { primary } from "@/constants/Colors";
@@ -16,17 +16,18 @@ export default function LoginScreen() {
   const { setIsLogedIn } = useUserStore();
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
+
   const loginMutation = useMutation({
     mutationFn: postLogin,
     onSuccess: async (data: { token: string }) => {
       console.log(data);
       await AsyncStorage.setItem(AppConfig.TOKEN_NAME, JSON.stringify(data.token));
       setIsLogedIn(true);
-      router.push("/(tabs)");
+      router.replace("/(tabs)");
     },
     onError: (error) => {
-      console.log(error.stack);
-    }
+      alert(error.message);
+    },
   })
 
   const handleLoginPress = () => {
@@ -54,7 +55,9 @@ export default function LoginScreen() {
       <View style={{ backgroundColor: 'white', padding: 30, width: "100%", gap: 20, height: "50%" }}>
         <TextInput placeholder="email" onChange={handleInputEmailChange} style={style.input} />
         <TextInput placeholder="password" onChange={handleInputPasswordChange} style={style.input} />
-        <Button title="Login" onPress={handleLoginPress} btnStyle={{ backgroundColor: primary }} textStyle={{ color: "white" }} />
+        {
+          loginMutation.isPending ? <ActivityIndicator  size="large" color={primary}/> : <Button title="Login" onPress={handleLoginPress} btnStyle={{ backgroundColor: primary }} textStyle={{ color: "white" }} />
+        }
       </View>
     </View>
   )
