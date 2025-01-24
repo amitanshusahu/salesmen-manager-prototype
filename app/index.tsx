@@ -48,6 +48,7 @@ export default function Index() {
         justifyContent: "center",
         alignItems: "center",
         height: "100%",
+        backgroundColor: "white",
       }}
     >
       <Image source={require('@/assets/images/nexus-logo.webp')} />
