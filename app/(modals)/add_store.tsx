@@ -10,6 +10,7 @@ import { primary } from "@/constants/Colors";
 
 export default function AddStore() {
   const [name, setName] = useState("");
+  const [marketName, setMarketName] = useState("");
   const [address, setAddress] = useState("");
   const [region, setRegion] = useState("");
   const [state, setState] = useState("");
@@ -52,12 +53,17 @@ export default function AddStore() {
     setState(e.nativeEvent.text);
   }
 
+  const handleMarketNameChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+    setMarketName(e.nativeEvent.text);
+  }
+
   const mutation = useMutation({
     mutationFn: addLocation,
     onSuccess: (data) => {
       console.log(data);
       alert('Store Added Successfully');
       setName('');
+      setMarketName('');
       setAddress('');
       setRegion('');
       setState('');
@@ -73,7 +79,7 @@ export default function AddStore() {
 
     if (location) {
       const { latitude, longitude } = location;
-      mutation.mutate({ name, address, latitude, longitude, region, state });
+      mutation.mutate({ name, marketName, address, latitude, longitude, region, state });
     } else {
       alert('Please retrieve the location first.');
     }
@@ -87,12 +93,18 @@ export default function AddStore() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ display: 'flex', alignItems: 'center', minHeight: '100%', gap: 20, marginTop: 100 }}>
+      <View style={{ display: 'flex', alignItems: 'center', minHeight: '100%', gap: 20, marginTop: 30 }}>
         <MapPinPlus size={100} color={primary} weight="duotone" duotoneColor={primary} />
         <TextInput
-          placeholder="Market Name"
+          placeholder="Name"
           value={name}
           onChange={handleInputNameChange}
+          style={style.input}
+        />
+        <TextInput
+          placeholder="Market Name"
+          value={marketName}
+          onChange={handleMarketNameChange}
           style={style.input}
         />
         <TextInput
@@ -122,6 +134,7 @@ export default function AddStore() {
           />
         }
       </View>
+      <View style={{padding: 30}}></View>
     </ScrollView>
   );
 }

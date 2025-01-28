@@ -13,6 +13,7 @@ import { useMannagedCounts } from "@/store";
 interface Location {
   id: number;
   name: string;
+  market_name: string;
   address: string;
   latitude: number;
   longitude: number;
@@ -35,9 +36,9 @@ export default function LocationList() {
   });
   const refetch = locationQuery.refetch;
   useRefreshOnFocus(refetch);
-  const {setTotalStores} = useMannagedCounts();
+  const { setTotalStores } = useMannagedCounts();
   useEffect(() => {
-    if(locationQuery.isSuccess) {
+    if (locationQuery.isSuccess) {
       setTotalStores(locationQuery.data.data.length);
     }
   }, [locationQuery.data]);
@@ -63,6 +64,7 @@ export default function LocationList() {
 
             const trimmedName = truncate(item.name, 20);
             const trimmedAddress = truncate(item.address, 30);
+            const trimmedMarketName = truncate(item.market_name, 30);
 
             return (
               <View
@@ -83,7 +85,7 @@ export default function LocationList() {
                     display: 'flex',
                     flexDirection: "row",
                     justifyContent: 'center',
-                    alignItems: 'center',
+                    alignItems: 'flex-start',
                     gap: 10
                   }}
                 >
@@ -92,6 +94,7 @@ export default function LocationList() {
                     {/* Truncated Name */}
                     <Text style={{ fontWeight: "500", fontSize: 18 }}>{trimmedName}</Text>
                     {/* Full Multiline Address */}
+                    <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedMarketName}</Text>
                     <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedAddress}</Text>
                   </View>
                 </View>
@@ -103,7 +106,7 @@ export default function LocationList() {
                     backgroundColor: "#e3eeff",
                     borderRadius: 10
                   }}
-                  onPress={() => router.push(`/(modals)/qr/${item.id}?name=${encodeURIComponent(item.name)}&address=${encodeURIComponent(item.address)}`)}
+                  onPress={() => router.push(`/(modals)/qr/${item.id}?name=${encodeURIComponent(item.name)}&address=${encodeURIComponent(item.address)}&market_name=${encodeURIComponent(item.market_name)}`)}
                 >
                   <CaretRight size={32} color={primary} />
                 </TouchableOpacity>
@@ -113,6 +116,7 @@ export default function LocationList() {
           {locationQuery.isFetching && <ActivityIndicator size="large" color={primary} />}
         </View>
       </View>
+      <View style={{ padding: 30 }}></View>
     </ScrollView>
   );
 }

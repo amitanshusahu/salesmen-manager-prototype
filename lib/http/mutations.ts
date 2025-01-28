@@ -17,8 +17,8 @@ export async function addSalesMan({ name, userid }: { name: string, userid: stri
   return res.data;
 }
 
-export async function addLocation({name, address, latitude, longitude, region, state}: {name: string, address: string, latitude: number, longitude: number, region: string, state: string}) {
-  const res = await api.post(API_ROUTES.LOCATION.CREATE, { name, address, latitude, longitude, region, state });
+export async function addLocation({name, marketName, address, latitude, longitude, region, state}: {name: string, marketName: string, address: string, latitude: number, longitude: number, region: string, state: string}) {
+  const res = await api.post(API_ROUTES.LOCATION.CREATE, { name, marketName,  address, latitude, longitude, region, state });
   console.log(res.data);
   return res.data;
 }

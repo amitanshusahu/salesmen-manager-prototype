@@ -16,7 +16,7 @@ const QRCodeWithRef = React.forwardRef((props: any, ref: any) => (
 ));
 
 export default function StoreQr() {
-  const { id, name, address } = useLocalSearchParams();
+  const { id, name, market_name, address } = useLocalSearchParams();
   const containerRef = useRef<View | null>(null);
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
   const [isViewReady, setIsViewReady] = useState(false);
@@ -110,6 +110,7 @@ export default function StoreQr() {
       >
         <View style={{ justifyContent: 'center', alignItems: "center" }}>
           <Text style={{ fontSize: 24, fontWeight: "900" }}>{name}</Text>
+          <Text style={{ fontSize: 12 }}>{market_name}</Text>
           <Text style={{ fontSize: 12 }}>{address}</Text>
         </View>
         <QRCodeWithRef

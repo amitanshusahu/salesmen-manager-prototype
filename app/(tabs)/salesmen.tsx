@@ -86,6 +86,7 @@ export default function salesmen() {
           {salesmanQuery.isFetching && <ActivityIndicator size="large" color={primary} />}
         </View>
       </View>
+      <View style={{padding: 30}}></View>
     </ScrollView>
   )
 }

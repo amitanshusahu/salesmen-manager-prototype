@@ -19,6 +19,7 @@ interface AssignedStoresData {
     updatedAt: string,
     Location: {
       name: string,
+      market_name: string,
       address: string,
       latitude: number,
       longitude: number,
@@ -92,9 +93,14 @@ export default function AssignedStores({ id }: { id: number }) {
   }
 
   const getScanDistanceFromLocationId = (locationId: number) => {
-    const location = vistitedLocationQuery.data?.data.find((item) => item.locationId === locationId);
-    return location?.scanDistance;
-  }
+    const location = vistitedLocationQuery.data?.data.find(
+      (item) => item.locationId === locationId
+    );
+    return location?.scanDistance !== undefined
+      ? parseFloat(location.scanDistance.toFixed(2))
+      : undefined;
+  };
+
 
   const getVisitCountFromLocationId = (locationId: number) => {
     const location = vistitedLocationQuery.data?.data.find((item) => item.locationId === locationId);
@@ -111,22 +117,35 @@ export default function AssignedStores({ id }: { id: number }) {
         </View>
         <View style={styles.infoRow}>
           <ClockCounterClockwise size={24} weight="bold" color={primary} />
-          <Text style={styles.infoText}>Last Activity:
+          <Text style={styles.infoText}>
+            Last Activity:
+            -
             {
-              (vistitedLocationQuery.data ? vistitedLocationQuery.data.data.length > 0 : false)
-              ? `${vistitedLocationQuery.data?.data[vistitedLocationQuery.data?.data.length - 1]?.updatedAt}`
-              : ' NA '
-           }</Text>
+              vistitedLocationQuery.data && vistitedLocationQuery.data.data.length > 0
+                ? new Date(vistitedLocationQuery.data.data[vistitedLocationQuery.data.data.length - 1]?.updatedAt)
+                  .toLocaleString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric',
+                  })
+                : ' NA'
+            }
+          </Text>
         </View>
       </View>
 
       {
         assignedStoresQuery.data?.assign.map((item) => {
           const truncate = (text: string, maxLength: number) =>
-            text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            text?.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 
           const trimmedName = truncate(item.Location.name, 20);
           const trimmedAddress = truncate(item.Location.address, 30);
+          const trimmedMarketName = truncate(item?.Location.market_name, 30);
+          const visitCount = getVisitCountFromLocationId(item.locationId);
+          const scanDistance = getScanDistanceFromLocationId(item.locationId) || 0;
 
           return (
             <View
@@ -153,11 +172,10 @@ export default function AssignedStores({ id }: { id: number }) {
               >
                 <GpsFix size={24} color={primary} duotoneColor={primary} />
                 <View>
-                  {/* Truncated Name */}
                   <Text>{trimmedName}</Text>
-                  {/* Full Multiline Address */}
+                  <Text style={{ color: "#aaa", flexWrap: "wrap" }}>{trimmedMarketName}</Text>
                   <Text style={{ color: "#aaa", flexWrap: "wrap" }}>{trimmedAddress}</Text>
-                  <Text style={{ color: "#aaa" }}>Scan Distance: {getScanDistanceFromLocationId(item.locationId) || 0} </Text>
+                  <Text style={{ color: (scanDistance > 300) ? "pink" : "#aaa" }}>Scan Distance: {scanDistance} m </Text>
                 </View>
               </View>
               <View
@@ -165,11 +183,17 @@ export default function AssignedStores({ id }: { id: number }) {
                   position: "absolute",
                   right: 0,
                   padding: 10,
-                  backgroundColor: "#fff2f2",
+                  backgroundColor: visitCount > 0 ? "#e4ffe3" : "#fff2f2",
                   borderRadius: 10
                 }}
               >
-                <Text style={{ color: 'red' }}> {getVisitCountFromLocationId(item.locationId)} </Text>
+                <Text
+                  style={{
+                    color: visitCount > 0 ? 'green' : 'red',
+                  }}
+                >
+                  {visitCount}
+                </Text>
               </View>
             </View>
           );

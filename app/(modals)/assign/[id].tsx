@@ -12,6 +12,7 @@ import EmptyBox from "@/components/ui/EmptyBox";
 interface Location {
   id: number;
   name: string;
+  market_name: string;
   address: string;
   latitude: number;
   longitude: number;
@@ -122,17 +123,18 @@ export default function AboutSalesmen() {
             <ActivityIndicator size="large" color={primary} />
           )}
           {locationQuery.isError && <Text>Error...</Text>}
-          {locationQuery?.data?.data.length === 0 && (
+          {locationQuery?.data?.data?.length === 0 && (
             <EmptyBox text="No Stores Found" />
           )}
           {locationQuery.data?.data.map((item) => {
             const truncate = (text: string, maxLength: number) =>
-              text.length > maxLength
+              text?.length > maxLength
                 ? text.substring(0, maxLength) + "..."
                 : text;
 
             const trimmedName = truncate(item.name, 20);
             const trimmedAddress = truncate(item.address, 30);
+            const trimmedMarketName = truncate(item?.market_name, 30);
 
             // Check if the location is already assigned
             const isAssigned = assignedStoresQuery.data?.assign.some(
@@ -158,7 +160,7 @@ export default function AboutSalesmen() {
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "center",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                     gap: 10,
                   }}
                 >
@@ -172,6 +174,7 @@ export default function AboutSalesmen() {
                     <Text style={{ fontWeight: "500", fontSize: 18 }}>
                       {trimmedName}
                     </Text>
+                    <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedMarketName}</Text>
                     <Text style={{ color: "#555", flexWrap: "wrap" }}>
                       {trimmedAddress}
                     </Text>
@@ -208,6 +211,7 @@ export default function AboutSalesmen() {
           })}
         </View>
       </View>
+      <View style={{padding: 30}}></View>
     </ScrollView>
   );
 }

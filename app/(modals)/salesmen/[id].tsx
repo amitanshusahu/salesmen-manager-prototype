@@ -24,7 +24,8 @@ export default function AboutSalesmen() {
       </View>
 
       <AssignedStores id={Number(id)} />
-
+      
+      <View style={{padding: 30}}></View>
     </ScrollView>
   );
 }
