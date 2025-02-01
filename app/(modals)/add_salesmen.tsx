@@ -6,10 +6,12 @@ import { useMutation } from '@tanstack/react-query';
 import { primary } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { At, CaretLeft } from 'phosphor-react-native';
+import { Picker } from '@react-native-picker/picker';
 
 export default function AddSalesmen() {
   const [name, setName] = useState('');
   const [uid, setUid] = useState('');
+  const [salesManType, setSalesManType] = useState<"VANSALES" | "PRESELLER" | "MERCHANDISER" | "DILIVERY">("VANSALES");
   const router = useRouter();
 
   const handleInputNameChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
@@ -36,7 +38,7 @@ export default function AddSalesmen() {
 
   const handleAddSalesmen = () => {
     console.log(name, uid);
-    mutation.mutate({ name, userid: uid });
+    mutation.mutate({ name, userid: uid, salesManType });
   };
 
   return (
@@ -62,6 +64,19 @@ export default function AddSalesmen() {
           style={style.input}
           keyboardType="numeric"
         />
+        <View style={{ width: '100%', borderWidth: 1, borderRadius: 10, paddingHorizontal: 10 }}>
+          <Picker
+            selectedValue={salesManType}
+            onValueChange={(itemValue) => setSalesManType(itemValue)}
+            style={{ height: 50, width: '100%' }}
+            mode='dropdown'
+          >
+            <Picker.Item label="Van Sales" value="VANSALES" />
+            <Picker.Item label="Pre Sales" value="PRESELLER" />
+            <Picker.Item label="Merchandiser" value="MERCHANDISER" />
+            <Picker.Item label="Delivery" value="DILIVERY" />
+          </Picker>
+        </View>
         {
           mutation.isPending ? <ActivityIndicator size="large" color={primary} /> : <Button
             title="Add Salesman"

@@ -17,6 +17,9 @@ interface Location {
   address: string;
   latitude: number;
   longitude: number;
+  region: string;
+  state: string;
+  storeType: "RETAILER" | "WHOLESALER" | "DISTRIBUTOR";
 }
 
 interface LocationData {
@@ -94,7 +97,7 @@ export default function LocationList() {
                     {/* Truncated Name */}
                     <Text style={{ fontWeight: "500", fontSize: 18 }}>{trimmedName}</Text>
                     {/* Full Multiline Address */}
-                    <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedMarketName}</Text>
+                    <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedMarketName}, {item.storeType}</Text>
                     <Text style={{ color: "#555", flexWrap: "wrap" }}>{trimmedAddress}</Text>
                   </View>
                 </View>

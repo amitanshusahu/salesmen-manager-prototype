@@ -16,6 +16,7 @@ interface SalesMen {
   uid: string;
   phone: string;
   managerId: number;
+  salesManType: "VANSALES" | "PRESELLER" | "MERCHANDISER" | "DILIVERY";
 }
 
 interface SalesMenData {
@@ -72,9 +73,14 @@ export default function salesmen() {
                     {item.name}
                   </Text>
                   <Text
-                    style={{ color: "#555" }}
+                    style={{ color: "#555", fontSize: 12 }}
                   >
                     {item.uid}
+                  </Text>
+                  <Text
+                    style={{ color: "#aaa", fontSize: 12 }}
+                  >
+                    {item.salesManType}
                   </Text>
                 </View>
               </View>

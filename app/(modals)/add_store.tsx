@@ -7,6 +7,7 @@ import * as Location from 'expo-location';
 import { CaretLeft, MapPinPlus } from "phosphor-react-native";
 import { useRouter } from "expo-router";
 import { primary } from "@/constants/Colors";
+import { Picker } from "@react-native-picker/picker";
 
 export default function AddStore() {
   const [name, setName] = useState("");
@@ -14,6 +15,7 @@ export default function AddStore() {
   const [address, setAddress] = useState("");
   const [region, setRegion] = useState("");
   const [state, setState] = useState("");
+  const [storeType, setStoreType] = useState<"RETAILER" | "WHOLESALER" | "DISTRIBUTOR">("RETAILER");
   const router = useRouter();
 
   const getLocation = async () => {
@@ -79,7 +81,7 @@ export default function AddStore() {
 
     if (location) {
       const { latitude, longitude } = location;
-      mutation.mutate({ name, marketName, address, latitude, longitude, region, state });
+      mutation.mutate({ name, marketName, address, latitude, longitude, region, state, storeType });
     } else {
       alert('Please retrieve the location first.');
     }
@@ -93,7 +95,7 @@ export default function AddStore() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ display: 'flex', alignItems: 'center', minHeight: '100%', gap: 20, marginTop: 30 }}>
+      <View style={{ display: 'flex', alignItems: 'center', minHeight: '100%', gap: 20, marginTop: 10 }}>
         <MapPinPlus size={100} color={primary} weight="duotone" duotoneColor={primary} />
         <TextInput
           placeholder="Name"
@@ -107,6 +109,18 @@ export default function AddStore() {
           onChange={handleMarketNameChange}
           style={style.input}
         />
+        <View style={{ width: '100%', borderWidth: 1, borderRadius: 10, paddingHorizontal: 10 }}>
+          <Picker
+            selectedValue={storeType}
+            onValueChange={(itemValue) => setStoreType(itemValue)}
+            style={{ height: 50, width: '100%' }}
+            mode='dropdown'
+          >
+            <Picker.Item label="Retailer" value="RETAILER" />
+            <Picker.Item label="Wholesaler" value="WHOLESALER" />
+            <Picker.Item label="Distributor" value="DISTRIBUTOR" />
+          </Picker>
+        </View>
         <TextInput
           placeholder="Address"
           value={address}
@@ -134,7 +148,7 @@ export default function AddStore() {
           />
         }
       </View>
-      <View style={{padding: 30}}></View>
+      <View style={{ padding: 30 }}></View>
     </ScrollView>
   );
 }
