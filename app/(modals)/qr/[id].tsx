@@ -46,15 +46,38 @@ export default function StoreQr() {
       alert('The view is not ready for capturing!');
       return;
     }
+  
     console.log('Printing...');
     try {
       await new Promise(resolve => setTimeout(resolve, 100));
+  
+      // Capture the entire container
       const uri = await captureRef(containerRef, { format: 'png', quality: 1 });
+  
+      // Convert to base64
       const base64 = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
+  
+      // Apply transformations in the HTML
       await Print.printAsync({
-        html: `<img src="data:image/png;base64,${base64}" style="width:100%;"/>`,
+        html: `
+          <html>
+            <head>
+              <style>
+                body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                img { 
+                  transform: rotate(${rotation}deg) scale(${scale}); 
+                  width: ${scale * 100}%; 
+                  max-width: 100%; 
+                }
+              </style>
+            </head>
+            <body>
+              <img src="data:image/png;base64,${base64}" />
+            </body>
+          </html>
+        `,
       });
     } catch (error) {
       console.error('Print failed: ', error);
@@ -67,7 +90,8 @@ export default function StoreQr() {
         alert('Failed to save screenshot to the gallery as well.');
       }
     }
-  }, [handleSaveToGallery]);
+  }, [handleSaveToGallery, rotation, scale]);
+  
 
   const handleLayout = useCallback(() => setIsViewReady(true), []);
 
