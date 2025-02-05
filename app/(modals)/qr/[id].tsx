@@ -112,7 +112,7 @@ export default function StoreQr() {
         >
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <Text style={styles.title}>{name}</Text>
-            <Text style={styles.subtitle}>{market_name}</Text>
+            {/*<Text style={styles.subtitle}>{market_name}</Text>*/}
             <Text style={styles.subtitle}>{address}</Text>
           </View>
           <QRCode value={`${id}`} size={250} logo={require('@/assets/images/nexus-logo.webp')} />
@@ -161,11 +161,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 27,
     fontWeight: '900',
+    textAlign: "center"
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 20,
+    fontWeight: '900',
+    textAlign: 'center'
   },
   controls: {
     width: '100%',
