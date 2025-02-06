@@ -8,6 +8,7 @@ import { CaretLeft, MapPinPlus } from "phosphor-react-native";
 import { useRouter } from "expo-router";
 import { primary } from "@/constants/Colors";
 import { Picker } from "@react-native-picker/picker";
+import ClickOnce from "@/components/ui/ClickOnce";
 
 export default function AddStore() {
   const [name, setName] = useState("");
@@ -17,6 +18,7 @@ export default function AddStore() {
   const [state, setState] = useState("");
   const [storeType, setStoreType] = useState<"RETAILER" | "WHOLESALER" | "DISTRIBUTOR">("RETAILER");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const getLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -74,14 +76,21 @@ export default function AddStore() {
       console.error(error);
       alert('Error Adding Store');
     },
+    onSettled: () => { setLoading(false) }
   });
 
   const handleAddStore = async () => {
+    setLoading(true);
     const location = await getLocation();
 
     if (location) {
       const { latitude, longitude } = location;
-      mutation.mutate({ name, marketName, address, latitude, longitude, region, state, storeType });
+      if (name != "" || marketName != "" || address != "" || region != "" || state != "")
+        mutation.mutate({ name, marketName, address, latitude, longitude, region, state, storeType });
+      else {
+        alert('Please fill all the fields');
+        setLoading(false);
+      }
     } else {
       alert('Please retrieve the location first.');
     }
@@ -139,14 +148,14 @@ export default function AddStore() {
           onChange={handleStateChange}
           style={style.input}
         />
-        {
-          mutation.isPending ? <ActivityIndicator size="large" color={primary} /> : <Button
+        <ClickOnce isLoading={loading}>
+          <Button
             title="Add Store"
             btnStyle={{ width: '100%', backgroundColor: primary }}
             textStyle={{ color: 'white' }}
             onPress={handleAddStore}
           />
-        }
+        </ClickOnce>
       </View>
       <View style={{ padding: 30 }}></View>
     </ScrollView>

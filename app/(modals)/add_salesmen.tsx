@@ -7,12 +7,14 @@ import { primary } from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { At, CaretLeft } from 'phosphor-react-native';
 import { Picker } from '@react-native-picker/picker';
+import ClickOnce from '@/components/ui/ClickOnce';
 
 export default function AddSalesmen() {
   const [name, setName] = useState('');
   const [uid, setUid] = useState('');
   const [salesManType, setSalesManType] = useState<"VANSALES" | "PRESELLER" | "MERCHANDISER" | "DILIVERY">("VANSALES");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleInputNameChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
     setName(e.nativeEvent.text);
@@ -34,11 +36,20 @@ export default function AddSalesmen() {
       console.log(error);
       alert('Error');
     },
+    onSettled: () => {
+      setLoading(false);
+    }
   });
 
   const handleAddSalesmen = () => {
+    setLoading(true);
     console.log(name, uid);
-    mutation.mutate({ name, userid: uid, salesManType });
+    if (name != "" && uid != "")
+      mutation.mutate({ name, userid: uid, salesManType });
+    else {
+      alert("Please fill all fields");
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,14 +88,14 @@ export default function AddSalesmen() {
             <Picker.Item label="Delivery" value="DILIVERY" />
           </Picker>
         </View>
-        {
-          mutation.isPending ? <ActivityIndicator size="large" color={primary} /> : <Button
+        <ClickOnce isLoading={loading}>
+          <Button
             title="Add Salesman"
             btnStyle={{ width: '100%', backgroundColor: primary }}
             textStyle={{ color: 'white' }}
             onPress={handleAddSalesmen}
           />
-        }
+        </ClickOnce>
       </View>
     </View>
   );
