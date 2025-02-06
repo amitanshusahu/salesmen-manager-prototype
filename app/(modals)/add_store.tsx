@@ -72,9 +72,11 @@ export default function AddStore() {
       setRegion('');
       setState('');
     },
-    onError: (error) => {
+    onError: (error: {
+      response: { data: { msg: string } };
+    }) => {
       console.error(error);
-      alert('Error Adding Store');
+      alert(error.response.data.msg);
     },
     onSettled: () => { setLoading(false) }
   });

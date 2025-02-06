@@ -25,8 +25,10 @@ export default function LoginScreen() {
       setIsLogedIn(true);
       router.replace("/(tabs)");
     },
-    onError: (error) => {
-      alert(error.message);
+    onError: (error: {
+      response: { data: { msg: string } };
+    }) => {
+      alert(error.response.data.msg);
     },
   })
 

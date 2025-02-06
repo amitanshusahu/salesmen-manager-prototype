@@ -55,6 +55,11 @@ async function assignLocation({ locationId, salesManId }: { locationId: number, 
   return res.data;
 }
 
+async function unAssignLocation({ locationId, salesManId }: { locationId: number, salesManId: number }) {
+  const res = await api.post(API_ROUTES.SALESMEN.UNASSIGN_STORE, { locationId, salesManId });
+  return res.data;
+}
+
 export default function AboutSalesmen() {
   useRefreshOnFocus(() => locationQuery.refetch());
   const { id } = useLocalSearchParams();
@@ -77,14 +82,36 @@ export default function AboutSalesmen() {
       // Refetch assigned stores to update the UI
       refetch();
     },
-    onError: (err) => {
-      alert(err.message);
+    onError: (error: {
+      response: { data: { msg: string } };
+    }) => {
+      alert(error.response.data.msg);
+    },
+  });
+
+  const unAssignMutaion = useMutation({
+    mutationFn: unAssignLocation,
+    onSuccess: () => {
+      alert("Location Unassigned");
+      // Refetch assigned stores to update the UI
+      refetch();
+    },
+    onError: (error: {
+      response: { data: { msg: string } };
+    }) => {
+      alert(error.response.data.msg);
     },
   });
 
   const handleAssignLocation = (locationId: number) => {
     if (typeof id === "string") {
       assignMutaion.mutate({ locationId, salesManId: parseInt(id) });
+    }
+  };
+
+  const handleUnAssignLocation = (locationId: number) => {
+    if (typeof id === "string") {
+      unAssignMutaion.mutate({ locationId, salesManId: parseInt(id) });
     }
   };
 
@@ -110,6 +137,9 @@ export default function AboutSalesmen() {
         }}
       >
         {assignMutaion.isPending && (
+          <ActivityIndicator size="large" color={primary} />
+        )}
+        {unAssignMutaion.isPending && (
           <ActivityIndicator size="large" color={primary} />
         )}
 
@@ -182,36 +212,59 @@ export default function AboutSalesmen() {
                 </View>
 
                 {/* Show Plus or Cross Button based on assignment */}
-                <TouchableOpacity
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    padding: 10,
-                    backgroundColor: isAssigned ? "#ffebe6" : "#e3eeff",
-                    borderRadius: 10,
-                  }}
-                  onPress={() => {
-                    if (!isAssigned) {
-                      handleAssignLocation(item.id);
-                    } else {
-                      alert(
-                        "This location is already assigned, ask for support to unassign"
-                      );
-                    }
-                  }}
-                >
-                  {isAssigned ? (
-                    <X size={32} color="red" />
+                {
+                  !isAssigned ? (
+                    <TouchableOpacity
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        padding: 10,
+                        backgroundColor: "#e3eeff",
+                        borderRadius: 10,
+                      }}
+                      onPress={() => {
+                        if (!isAssigned) {
+                          handleAssignLocation(item.id);
+                        } else {
+                          alert(
+                            "This location is already assigned"
+                          );
+                        }
+                      }}
+                    >
+                      <Plus size={32} color={primary} />
+                    </TouchableOpacity>
                   ) : (
-                    <Plus size={32} color={primary} />
-                  )}
-                </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        padding: 10,
+                        backgroundColor: "#ffebe6",
+                        borderRadius: 10,
+                      }}
+                      onPress={() => {
+                        if (isAssigned) {
+                          handleUnAssignLocation(item.id);
+                        } else {
+                          alert(
+                            "This location is already unassigned"
+                          );
+                        }
+                      }}
+                    >
+                      <X size={32} color="red" />
+                    </TouchableOpacity>
+                  )
+                }
+
+
               </View>
             );
           })}
         </View>
       </View>
-      <View style={{padding: 30}}></View>
+      <View style={{ padding: 30 }}></View>
     </ScrollView>
   );
 }

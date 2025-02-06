@@ -42,7 +42,6 @@ export default function StoreQr() {
 
   const handlePrint = useCallback(async () => {
     if (!containerRef.current) {
-      console.log('The view is not ready for capturing!');
       alert('The view is not ready for capturing!');
       return;
     }
@@ -51,16 +50,21 @@ export default function StoreQr() {
     try {
       await new Promise(resolve => setTimeout(resolve, 100));
   
-      // Capture the entire container
+      // Capture the QR container as an image
       const uri = await captureRef(containerRef, { format: 'png', quality: 1 });
   
-      // Convert to base64
+      // Convert image to base64
       const base64 = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
   
-      // Apply transformations in the HTML
-      await Print.printAsync({
+      // Generate a proper filename
+      let safeName = 'QR_Code';
+      if (typeof name == 'string') {
+        safeName = name ? name.replace(/[^a-zA-Z0-9_-]/g, '_') : 'QR_Code';
+      }
+      let fileName = `QR_${safeName}.pdf`;
+      const pdf = await Print.printToFileAsync({
         html: `
           <html>
             <head>
@@ -78,20 +82,33 @@ export default function StoreQr() {
             </body>
           </html>
         `,
+        width: 612,
+        height: 792,
       });
+  
+      // Move the file to a new path with the correct name
+      const newPath = `${FileSystem.documentDirectory}${fileName}`;
+      await FileSystem.moveAsync({ from: pdf.uri, to: newPath });
+  
+      // Provide an option to open the saved file
+      alert(`PDF saved as ${fileName}\nLocation: ${newPath}`);
+      await Print.printAsync({ uri: newPath });
+  
     } catch (error) {
-      console.error('Print failed: ', error);
+      console.error('Print failed:', error);
       alert('Printing failed. Saving the screenshot to the gallery instead...');
       try {
         const uri = await captureRef(containerRef, { format: 'png', quality: 1 });
         await handleSaveToGallery(uri);
       } catch (galleryError) {
-        console.error('Gallery save failed: ', galleryError);
+        console.error('Gallery save failed:', galleryError);
         alert('Failed to save screenshot to the gallery as well.');
       }
     }
-  }, [handleSaveToGallery, rotation, scale]);
+  }, [handleSaveToGallery, rotation, scale, name]);
   
+
+
 
   const handleLayout = useCallback(() => setIsViewReady(true), []);
 
@@ -99,11 +116,11 @@ export default function StoreQr() {
     <View style={styles.screen}>
       <View style={styles.container}>
         <View
-          style={{ 
-            padding: 30, 
-            backgroundColor: 'white', 
-            borderRadius: 15, 
-            gap: 30, 
+          style={{
+            padding: 30,
+            backgroundColor: 'white',
+            borderRadius: 15,
+            gap: 30,
             transform: [{ rotate: `${rotation}deg` }, { scale: scale }]
           }}
           ref={containerRef}

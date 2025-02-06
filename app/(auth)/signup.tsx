@@ -23,8 +23,10 @@ export default function signup() {
       setIsLogedIn(true);
       router.replace("/(tabs)");
     },
-    onError: (error) => {
-      alert(error.message);
+    onError: (error: {
+      response: { data: { msg: string } };
+    }) => {
+      alert(error.response.data.msg);
     },
   })
 

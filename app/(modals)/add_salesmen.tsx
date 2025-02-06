@@ -32,9 +32,11 @@ export default function AddSalesmen() {
       setName('');
       setUid('');
     },
-    onError: (error) => {
+    onError: (error: {
+      response: { data: { msg: string } };
+    }) => {
       console.log(error);
-      alert('Error');
+      alert(error.response.data.msg);
     },
     onSettled: () => {
       setLoading(false);
